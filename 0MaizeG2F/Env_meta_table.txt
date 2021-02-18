@@ -1,0 +1,9 @@
+env_code	lat	lon	PlantingDate	TrialYear	Location	env_note
+DEH1_15	38.62932	-75.465731	2015-04-29	2015	Georgetown	hybrid
+ILH1_15	40.059337	-88.234116	2015-04-30	2015	Urbana	hybrid
+INH1_15	40.47666	-87.0004	2015-05-14	2015	West Lafayette	hybrid
+MNH1_15	44.070847	-93.535534	2015-05-19	2015	Waseca	hybrid
+NEH4_15	41.164394	-96.409561	2015-06-09	2015	Mead	hybrid
+OHH1_15	39.855359	-83.665356	2015-05-21	2015	South Charleston	hybrid
+ONH2_15	42.453461	-81.882117	2015-05-07	2015	Ridgetown	hybrid
+ONH1_15	43.498449	-80.4489	2015-04-30	2015	Waterloo	hybrid
