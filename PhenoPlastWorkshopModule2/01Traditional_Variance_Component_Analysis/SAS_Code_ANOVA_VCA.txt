@@ -1,0 +1,22 @@
+proc glm data=sasuser.sorghum;
+class Loc Rep Entry;
+model FTGDD=Loc rep(loc) entry loc*entry;
+run;
+
+
+proc mixed data=sasuser.sorghum;
+class loc rep entry;
+model FTGDD=/s;
+random loc rep(loc) entry loc*entry;
+run;
+
+
+data sasuser.sorghum_gbe_sub(where=(loc in ('KS11','KS12')));
+   set sasuser.sorghum_gbe;
+run;
+proc mixed data=sasuser.sorghum_gbe_sub;
+class loc rep entry;
+model GDD=/s;
+random loc rep(loc) entry loc*entry;
+run;
+

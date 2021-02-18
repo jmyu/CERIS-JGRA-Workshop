@@ -1,0 +1,24 @@
+#install.packages("VCA")
+library("VCA")
+Dir="C:/Users/tguo/Desktop/PhenoPlastWorkshopModule2/01Traditional_Variance_Component_Analysis/";
+
+Input_VCA=read.table(paste(Dir,"Input_Phenotypes.txt",sep=""),header=T)
+Input_VCA[1:4,]
+
+Input_VCA$Loc <- as.factor(Input_VCA$Loc)
+Input_VCA$GDD <- as.numeric(as.character(Input_VCA$FTGDD))
+
+Loc=as.character(Input_VCA$Loc);
+Entry=as.character(Input_VCA$Entry);
+Rep=as.character(Input_VCA$Rep);
+y=Input_VCA$GDD;
+
+mydataframe=data.frame(y,Loc,Entry,Rep);
+
+###For variance component analysis
+fit_r <-remlMM(y ~ (Loc)+(Loc/Rep)+(Entry)+(Loc*Entry), mydataframe)
+fit_r
+
+###For ANOVA (Analysis of variance)
+fit_a <-anovaMM(y ~ Loc+Loc/Rep+Entry+Loc*Entry, mydataframe)
+fit_a
