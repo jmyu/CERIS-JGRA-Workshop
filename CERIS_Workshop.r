@@ -24,15 +24,15 @@ t_base <- 50; t_max1 <- 100; t_max2 <- 1000; Haun_threshold <- 0; p <- 1
 ###
 Top_dir <- 'D:/0GbE/Workshop_2020/'; #### Modify this for your own directory
 
-###### If you modify some functions in this file, please run Line 27 each time to reload the updated functions
-subfunction_file <- paste(Top_dir, 'Sub_functions_Workshop.r', sep = '');
-source(subfunction_file);
-
 ######################################
 experiment <- '1Sorghum'; ## Options: 0MaizeG2F; 1Sorghum; 2Rice;  
 ##### For Maize, the traits are DTA, PH, and Yield; for Sorghum: the trait is called as FTgdd; for Rice, the trait is FTdap; ; 
 trait <- 'FTgdd'; ##### Options: for Maize (G2F): DTA, PH, or YLD; for sorghum: FTgdd; for rice: FTdap
 ######################################
+
+###### If you modify some functions in this file, please run Line 27 each time to reload the updated functions
+subfunction_file <- paste(Top_dir, 'Sub_functions_Workshop.r', sep = '');
+source(subfunction_file);
 
 exp_dir <- paste(Top_dir, experiment, '/', sep = '')
 env_meta_file <- paste(exp_dir, 'Env_meta_table.txt', sep = ''); ## make sure the PlantingDate is formated as 'YYYY-MM-DD'
