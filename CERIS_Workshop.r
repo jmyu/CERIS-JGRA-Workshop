@@ -15,7 +15,8 @@ if (!require(RColorBrewer)) { install.packages("RColorBrewer", repos = "https://
 if (!require(rrBLUP)) { install.packages("rrBLUP", repos = "https://cloud.r-project.org");}
 if (!require(BGLR)) { install.packages("BGLR", repos = "https://cloud.r-project.org");}
 if (!require(yarrr)) { install.packages("yarrr", repos = "https://cloud.r-project.org");}
-if (!require(openxlsx)) { install.packages("openxlsx", repos = "https://cloud.r-project.org");}
+#if (!require(openxlsx)) { install.packages("openxlsx", repos = "https://cloud.r-project.org");}
+#if (!require(xlsx)) { install.packages("xlsx", repos = "https://cloud.r-project.org");}
 
 col_wdw <- 25;
 col_palette <- diverge_hcl(col_wdw + 1, h = c(260, 0), c = 100, l = c(50, 90), power = 1)
@@ -31,7 +32,7 @@ trait <- 'FTgdd'; ##### Options: for Maize (G2F): DTA, PH, or YLD; for sorghum: 
 ######################################
 
 ###### If you modify some functions in this file, please run Line 27 each time to reload the updated functions
-subfunction_file <- paste(Top_dir, 'Sub_functions_Workshop.r', sep = '');
+subfunction_file <- paste(Top_dir, 'Sub_functions_Workshop_TTedits.r', sep = '');
 source(subfunction_file);
 
 exp_dir <- paste(Top_dir, experiment, '/', sep = '')
@@ -92,9 +93,9 @@ env_cols <- rainbow_hcl(length(all_env_codes), c = 80, l = 60, start = 0, end = 
   
 ##########################################################
 ### Change the following three parameters for the window and environmental parameter with the strongest correlation
-  maxR_dap1 <- 22;
+  maxR_dap1 <- 18;
   maxR_dap2 <- 43;
-  kPara_Name <- 'GDD';
+  kPara_Name <- 'PTT';
 ##### #################################################### 
 
   PTT_PTR_ind <-  which(colnames(PTT_PTR) == kPara_Name); 
@@ -124,27 +125,52 @@ pheno=pheno[which(as.character(pheno$V1)%in%c("line_code",as.character(geno$line
 tt.line=nrow(pheno)*0.5; ##remove the environment for which the number of missing line > tt.line 
 tt.e=c(ncol(pheno)-1)-3; ##remove the line for which the number of missing environment > tt.e
 enp=which(colnames(envir) == kPara_Name); 
-fold=3;
-reshuffle=2;
-
+fold=2;
+reshuffle=5;
 ###Through reaction norm parameter
+result.name=c("values","within","across");
 out1.2=JGRA(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.E",fold,reshuffle)  ## 1->2 prediction
-write.xlsx(out1.2, file = paste(exp_trait_dir,"Result_Norm_1.2.xlsx",sep=""))
+write.table(out1.2[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.2.txt",sep=""),quote=F,row.names=F)
+###within###
+out1.2[[2]]
+###across###
+out1.2[[3]]
 
 out1.3=JGRA(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.G",fold,reshuffle)  ## 1->3 prediction
-write.xlsx(out1.3, file = paste(exp_trait_dir,"Result_Norm_1.3.xlsx",sep=""))
+write.table(out1.3[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.3.txt",sep=""),quote=F,row.names=F)
+###within###
+apply(out1.3[[2]],2,mean)
+###across###
+mean(out1.3[[3]])
 
 out1.4=JGRA(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.GE",fold,reshuffle) ## 1->4 prediction
-write.xlsx(out1.4, file = paste(exp_trait_dir,"Result_Norm_1.4.xlsx",sep=""))
+write.table(out1.4[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.4.txt",sep=""),quote=F,row.names=F)
+###within###
+apply(out1.4[[2]],2,mean)
+###across###
+mean(out1.4[[3]])
 
 ### Through marker effect
+
 out1.2=JGRA.marker(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.E",fold,reshuffle)
-write.xlsx(out1.2, file = paste(exp_trait_dir,"Result_Marker_1.2.xlsx",sep=""))
+write.table(out1.2[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.2.txt",sep=""),quote=F,row.names=F)
+###within###
+out1.2[[2]]
+###across###
+out1.2[[3]]
 
 out1.3=JGRA.marker(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.G",fold,reshuffle)
-write.xlsx(out1.3, file = paste(exp_trait_dir,"Result_Marker_1.3.xlsx",sep=""))
+write.table(out1.3[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.3.txt",sep=""),quote=F,row.names=F)
+###within###
+apply(out1.3[[2]],2,mean)
+###across###
+mean(out1.3[[3]])
 
 out1.4=JGRA.marker(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.GE",fold,reshuffle) #### Need a longer time to run than others; be patient
-write.xlsx(out1.4, file = paste(exp_trait_dir,"Result_Marker_1.4.xlsx",sep=""))
+write.table(out1.4[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.4.txt",sep=""),quote=F,row.names=F)
+###within###
+apply(out1.4[[2]],2,mean)
+###across###
+mean(out1.4[[3]])
 
 
