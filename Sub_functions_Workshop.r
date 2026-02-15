@@ -902,3 +902,209 @@ if(mets=="RM.GE")
 
 return(list(outforfigure,r_within,r_across));
 }
+
+Plot_JGRA <- function(exp_trait_dir,pheno,envir,file_int_slo,file_out1.2,file_out1.3,file_out1.4,prefix_plot) {
+  # exp_trait_dir <- "C:/lujiawen/13_ISU/Summary/20260209_CERIS_JGRA_workshop/1Sorghum/FTgdd/"
+  # pheno
+  # envir
+  # file_int_slo <- "Intcp_Slope.txt"
+  # file_out1.2 <- "Prediction_Result_values_Norm_1.2.xlsx"
+  # file_out1.3 <- "Prediction_Result_values_Norm_1.3.xlsx"
+  # file_out1.4 <- "Prediction_Result_values_Norm_1.4.xlsx"
+  
+  pdf(paste0(exp_trait_dir,prefix_plot,".pdf"))
+  mat=matrix(c(1:4),nrow=2,ncol=2,byrow=T)
+  layout(mat,widths=c(2.5,2.5),heights=c(2.5,2.5))
+  par(mar=c(3,3,2,0.5),mgp=c(2,0.5,0),tcl=-0.2)
+  
+  #Panel0#######################################################################################################################
+  colnames(pheno)=as.character(unlist(pheno[1,]))
+  name_env=colnames(pheno)[-1]
+  pheno=pheno[-1,]
+  m=pheno[,-1];
+  m=as.numeric(as.character(unlist(m)));m <- matrix(data=m, ncol=dim(pheno)[2]-1, nrow=dim(pheno)[1]);
+  colnames(m)=colnames(pheno)[-1];
+  pheno_=data.frame(line_code=pheno$line_code,m)
+  colnames(pheno_)=c("line_code",name_env)
+  pheno=pheno_
+  name_line=as.character(pheno$line_code)
+  no_e <- length(name_env)
+  no_l <- length(name_line)
+  
+  int_slo <- read.table(file.path(exp_trait_dir,file_int_slo),header=T,sep="\t")
+  int_slo <- int_slo[match(name_line,as.character(int_slo$line_code)),]
+  
+  envir=envir[match(name_env,envir$env_code),]
+  
+  pheno$slope <- int_slo$Slope_para;
+  pheno$col_order=rank(pheno$slope)
+  line_col_index <- pheno$col_order
+  line_colors=colorRampPalette(c("Cyan","White","Magenta"))(length(line_col_index))[line_col_index] ##
+  Env_order4=envir[,kPara_Name];names(Env_order4)=envir$env_code;
+  
+  ##all fitted values
+  fit_pheno <- data.frame()
+  mean.em <- mean(Env_order4)
+  for (i in 1:nrow(int_slo)) {
+    # i <- 1
+    inter <- int_slo$Intcp_para[i]
+    sloo <- int_slo$Slope_para[i]
+    fit_pheno <- rbind(fit_pheno,data.frame(line_code = int_slo$line_code[i],env_code = names(Env_order4),Env_order4,fit_value = inter+sloo*(Env_order4-mean.em)))
+  }
+  pheno_range <- range(c(fit_pheno$fit_value,unlist(pheno[,name_env])),na.rm = T) ##range for all panels
+  plot(0, 0, col = "white", xlim = range(Env_order4), ylim = pheno_range,  ylab = trait,  xlab = kPara_Name, cex.axis = 1, cex.lab = 1.1); # , fg = "gray50" 
+  for (i in 1:nrow(int_slo)) {
+    # i <- 1
+    lcode <- int_slo$line_code[i]
+    xvals <- fit_pheno$Env_order4[fit_pheno$line_code == lcode]
+    yvals <- fit_pheno$fit_value[fit_pheno$line_code == lcode]
+    points(xvals, yvals, col = line_colors[i], type = "l", pch = 19, lwd = 1)
+  }
+  mtext('A', side = 3, adj = 0,padj = 0, line = 0, cex = 1.2);
+  text(Env_order4, rep(max(fit_pheno$fit_value),no_e), gsub("[^0-9A-Za-z///' ]","" , names(Env_order4),ignore.case = TRUE),  srt = 90, cex = .8, adj = 1, family = "mono", font = 2)
+  
+  ## settings
+  # op <- par(family = "mono")
+  size=1;size.p=0.2
+  bb=0.15;
+  rdiff <- pheno_range[2]-pheno_range[1]
+  #Panel1#######################################################################################################################
+  out.1 <- read.xlsx(file.path(exp_trait_dir,file_out1.2),sheet = 1)
+  out0.2 <- read.xlsx(file.path(exp_trait_dir,file_out1.2),sheet = 2)
+  out.2 <- round(out0.2$cor_within,2);names(out.2) <- out0.2$envir
+  out.3 <- round(as.numeric(read.xlsx(file.path(exp_trait_dir,file_out1.2),sheet = 3,colNames = F)),3)
+  
+  plot(out.1$pre,out.1$obs,col=as.character(out.1$col),pch=16,cex=0.8,ylab=paste0("Observed ",trait),xlab=paste0("Predicted ",trait),cex.lab=size,cex.axis=size,xlim=pheno_range,ylim=pheno_range)
+  
+  coll=as.character(unique(out.1$col));
+  nameE=gsub("[^0-9A-Za-z///' ]","" , names(out.2) ,ignore.case = TRUE);
+  legend(pheno_range[2]*0.72,pheno_range[2]*0.68,pch=16,col=coll,bty="n",
+         legend=c(paste(nameE," (",out.2,")", sep = '')),
+         cex=size,pt.cex = 1.2,
+         xjust = 0,yjust = 1)
+  # par(op)
+  r1 <- sprintf("%.2f", out.3);
+  text(pheno_range[2]*0.95,pheno_range[2]*0.95,substitute(paste(italic('r'), " = ", R1), list(R1 = r1)),cex=size+0.2,adj = 1)
+  lines(x=pheno_range,y=pheno_range,col="Gray")
+  
+  xl=pheno_range[2]-rdiff*0.92;yb=pheno_range[2]*0.95-rdiff*0.3;xr=pheno_range[2]-rdiff*0.62;yu=pheno_range[2]*0.95; 
+  rect(xl,yb,xr,yu,border="black",lwd=1)
+  lines(c(xl,xr),c((yb+yu)/2,(yb+yu)/2),col="black",lwd=1)
+  lines(c((xl+xr)/2,(xl+xr)/2),c(yb,yu),col="black",lwd=1)
+  
+  text(xl+(xr-xl)/4,yu-(yu-yb)/4,"1",cex=size+0.5,col="black")
+  text(xr-(xr-xl)/4,yu-(yu-yb)/4,"2",cex=size+0.5,col="black")
+  text(xl+(xr-xl)/4,yb+(yu-yb)/4,"3",cex=size+0.5,col="Gray")
+  text(xr-(xr-xl)/4,yb+(yu-yb)/4,"4",cex=size+0.5,col="Gray")
+  
+  text(xl+(xr-xl)/4,yu+(yu-yb)/4-rdiff*0.035,"Tested",cex=size-bb)
+  text(xr-(xr-xl)/4,yu+(yu-yb)/4-rdiff*0.035,"Untested",cex=size-bb)
+  text((xr+xl)/2,yu+(yu-yb)/2-rdiff*0.07,"Environment",cex=size)
+  
+  text(xl-(xr-xl)/4+rdiff*0.035,yu-(yu-yb)/4,"Tested",cex=size-bb,srt=90)
+  text(xl-(xr-xl)/4+rdiff*0.035,yb+(yu-yb)/4,"Untested",cex=size-bb,srt=90)
+  text(xl-(xr-xl)/2+rdiff*0.07,(yu+yb)/2,"Genotype",cex=size,srt=90)
+  ##adarrow##
+  x0=xl+(xr-xl)/4
+  y0=yu-(yu-yb)/4
+  x1=xr-(xr-xl)/4
+  y1=yu-(yu-yb)/4
+  arrows(x0+rdiff*0.04,y0,x1-rdiff*0.04,y1,angle=15,length = 0.07)
+  mtext('B', side = 3, adj = 0,padj = 0, line = 0, cex = 1.2);
+  rm(out.1,out0.2,out.2,out.3)
+  
+  #Panel2#######################################################################################################################
+  out.1 <- read.xlsx(file.path(exp_trait_dir,file_out1.3),sheet = 1)
+  out0.2 <- read.xlsx(file.path(exp_trait_dir,file_out1.3),sheet = 2)
+  out.2 <- round(apply(out0.2,2,mean),2);
+  out.3 <- round(colMeans(read.xlsx(file.path(exp_trait_dir,file_out1.3),sheet = 3,colNames = F)),3)
+  
+  plot(out.1$pre,out.1$obs,col=as.character(out.1$col),pch=16,cex=0.8,ylab=paste0("Observed ",trait),xlab=paste0("Predicted ",trait),cex.lab=size,cex.axis=size,xlim=pheno_range,ylim=pheno_range)
+  
+  coll=as.character(unique(out.1$col));
+  nameE=gsub("[^0-9A-Za-z///' ]","" , names(out.2) ,ignore.case = TRUE);
+  
+  legend(pheno_range[2]*0.72,pheno_range[2]*0.68,pch=16,col=coll,bty="n",
+         legend=c(paste(nameE," (",out.2,")", sep = '')),
+         cex=size,pt.cex = 1.2,
+         xjust = 0,yjust = 1)
+  
+  # par(op)
+  r1 <- sprintf("%.2f", out.3);
+  text(pheno_range[2]*0.95,pheno_range[2]*0.95,substitute(paste(italic('r'), " = ", R1), list(R1 = r1)),cex=size+0.2,adj = 1)
+  lines(x=pheno_range,y=pheno_range,col="Gray")
+  
+  xl=pheno_range[2]-rdiff*0.92;yb=pheno_range[2]*0.95-rdiff*0.3;xr=pheno_range[2]-rdiff*0.62;yu=pheno_range[2]*0.95; 
+  rect(xl,yb,xr,yu,border="black",lwd=1)
+  lines(c(xl,xr),c((yb+yu)/2,(yb+yu)/2),col="black",lwd=1)
+  lines(c((xl+xr)/2,(xl+xr)/2),c(yb,yu),col="black",lwd=1)
+  
+  text(xl+(xr-xl)/4,yu-(yu-yb)/4,"1",cex=size+0.5,col="black")
+  text(xr-(xr-xl)/4,yu-(yu-yb)/4,"2",cex=size+0.5,col="Gray")
+  text(xl+(xr-xl)/4,yb+(yu-yb)/4,"3",cex=size+0.5,col="black")
+  text(xr-(xr-xl)/4,yb+(yu-yb)/4,"4",cex=size+0.5,col="Gray")
+  
+  text(xl+(xr-xl)/4,yu+(yu-yb)/4-rdiff*0.035,"Tested",cex=size-bb)
+  text(xr-(xr-xl)/4,yu+(yu-yb)/4-rdiff*0.035,"Untested",cex=size-bb)
+  text((xr+xl)/2,yu+(yu-yb)/2-rdiff*0.07,"Environment",cex=size)
+  
+  text(xl-(xr-xl)/4+rdiff*0.035,yu-(yu-yb)/4,"Tested",cex=size-bb,srt=90)
+  text(xl-(xr-xl)/4+rdiff*0.035,yb+(yu-yb)/4,"Untested",cex=size-bb,srt=90)
+  text(xl-(xr-xl)/2+rdiff*0.07,(yu+yb)/2,"Genotype",cex=size,srt=90)
+  ##adarrow##
+  x0=xl+(xr-xl)/4
+  y0=yu-(yu-yb)/4
+  x1=xl+(xr-xl)/4
+  y1=yb+(yu-yb)/4
+  
+  arrows(x0,y0-rdiff*0.04,x1,y1+rdiff*0.04,angle=15,length = 0.07)
+  mtext('C', side = 3, adj = 0,padj = 0, line = 0, cex = 1.2);
+  
+  #Panel3#######################################################################################################################
+  out.1 <- read.xlsx(file.path(exp_trait_dir,file_out1.4),sheet = 1)
+  out0.2 <- read.xlsx(file.path(exp_trait_dir,file_out1.4),sheet = 2)
+  out.2 <- round(apply(out0.2,2,mean),2);
+  out.3 <- round(colMeans(read.xlsx(file.path(exp_trait_dir,file_out1.4),sheet = 3,colNames = F)),3)
+  
+  plot(out.1$pre,out.1$obs,col=as.character(out.1$col),pch=16,cex=0.8,ylab=paste0("Observed ",trait),xlab=paste0("Predicted ",trait),cex.lab=size,cex.axis=size,xlim=pheno_range,ylim=pheno_range)
+  
+  coll=as.character(unique(out.1$col));
+  nameE=gsub("[^0-9A-Za-z///' ]","" , names(out.2) ,ignore.case = TRUE);
+  legend(pheno_range[2]*0.72,pheno_range[2]*0.68,pch=16,col=coll,bty="n",
+         legend=c(paste(nameE," (",out.2,")", sep = '')),
+         cex=size,pt.cex = 1.2,
+         xjust = 0,yjust = 1)
+  
+  # par(op)
+  r1 <- sprintf("%.2f", out.3);
+  text(pheno_range[2]*0.95,pheno_range[2]*0.95,substitute(paste(italic('r'), " = ", R1), list(R1 = r1)),cex=size+0.2,adj = 1)
+  lines(x=pheno_range,y=pheno_range,col="Gray")
+  
+  xl=pheno_range[2]-rdiff*0.92;yb=pheno_range[2]*0.95-rdiff*0.3;xr=pheno_range[2]-rdiff*0.62;yu=pheno_range[2]*0.95; 
+  rect(xl,yb,xr,yu,border="black",lwd=1)
+  lines(c(xl,xr),c((yb+yu)/2,(yb+yu)/2),col="black",lwd=1)
+  lines(c((xl+xr)/2,(xl+xr)/2),c(yb,yu),col="black",lwd=1)
+  
+  text(xl+(xr-xl)/4,yu-(yu-yb)/4,"1",cex=size+0.5,col="black")
+  text(xr-(xr-xl)/4,yu-(yu-yb)/4,"2",cex=size+0.5,col="Gray")
+  text(xl+(xr-xl)/4,yb+(yu-yb)/4,"3",cex=size+0.5,col="Gray")
+  text(xr-(xr-xl)/4,yb+(yu-yb)/4,"4",cex=size+0.5,col="black")
+  
+  text(xl+(xr-xl)/4,yu+(yu-yb)/4-rdiff*0.035,"Tested",cex=size-bb)
+  text(xr-(xr-xl)/4,yu+(yu-yb)/4-rdiff*0.035,"Untested",cex=size-bb)
+  text((xr+xl)/2,yu+(yu-yb)/2-rdiff*0.07,"Environment",cex=size)
+  
+  text(xl-(xr-xl)/4+rdiff*0.035,yu-(yu-yb)/4,"Tested",cex=size-bb,srt=90)
+  text(xl-(xr-xl)/4+rdiff*0.035,yb+(yu-yb)/4,"Untested",cex=size-bb,srt=90)
+  text(xl-(xr-xl)/2+rdiff*0.07,(yu+yb)/2,"Genotype",cex=size,srt=90)
+  ##adarrow##
+  x0=xl+(xr-xl)/4
+  y0=yu-(yu-yb)/4
+  x1=xr-(xr-xl)/4
+  y1=yb+(yu-yb)/4
+  
+  arrows(x0+rdiff*0.02,y0-rdiff*0.04,x1-rdiff*0.02,y1+rdiff*0.04,angle=15,length = 0.07)
+  mtext('D', side = 3, adj = 0,padj = 0, line = 0, cex = 1.2);
+  
+  dev.off()
+}
