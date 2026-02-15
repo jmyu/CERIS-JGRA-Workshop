@@ -13,9 +13,9 @@ if (!require(colorspace)) { install.packages("colorspace", repos = "https://clou
 if (!require(RColorBrewer)) { install.packages("RColorBrewer", repos = "https://cloud.r-project.org");}
 
 if (!require(rrBLUP)) { install.packages("rrBLUP", repos = "https://cloud.r-project.org");}
-if (!require(BGLR)) { install.packages("BGLR", repos = "https://cloud.r-project.org");}
-if (!require(yarrr)) { install.packages("yarrr", repos = "https://cloud.r-project.org");}
-#if (!require(openxlsx)) { install.packages("openxlsx", repos = "https://cloud.r-project.org");}
+#if (!require(BGLR)) { install.packages("BGLR", repos = "https://cloud.r-project.org");}
+i#f (!require(yarrr)) { install.packages("yarrr", repos = "https://cloud.r-project.org");}
+if (!require(openxlsx)) { install.packages("openxlsx", repos = "https://cloud.r-project.org");}
 #if (!require(xlsx)) { install.packages("xlsx", repos = "https://cloud.r-project.org");}
 
 col_wdw <- 25;
@@ -130,21 +130,24 @@ reshuffle=5;
 ###Through reaction norm parameter
 result.name=c("values","within","across");
 out1.2=JGRA(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.E",fold,reshuffle)  ## 1->2 prediction
-write.table(out1.2[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.2.txt",sep=""),quote=F,row.names=F)
+write.xlsx(out1.2, file = file.path(exp_trait_dir,"Prediction_Result_values_Norm_1.2.xlsx"))
+#write.table(out1.2[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.2.txt",sep=""),quote=F,row.names=F)
 ###within###
 out1.2[[2]]
 ###across###
 out1.2[[3]]
 
 out1.3=JGRA(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.G",fold,reshuffle)  ## 1->3 prediction
-write.table(out1.3[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.3.txt",sep=""),quote=F,row.names=F)
+write.xlsx(out1.3, file = file.path(exp_trait_dir,"Prediction_Result_values_Norm_1.3.xlsx"))
+#write.table(out1.3[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.3.txt",sep=""),quote=F,row.names=F)
 ###within###
 apply(out1.3[[2]],2,mean)
 ###across###
 mean(out1.3[[3]])
 
 out1.4=JGRA(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.GE",fold,reshuffle) ## 1->4 prediction
-write.table(out1.4[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.4.txt",sep=""),quote=F,row.names=F)
+write.xlsx(out1.4, file = file.path(exp_trait_dir,"Prediction_Result_values_Norm_1.4.xlsx"))
+#write.table(out1.4[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Norm_1.4.txt",sep=""),quote=F,row.names=F)
 ###within###
 apply(out1.4[[2]],2,mean)
 ###across###
@@ -153,13 +156,15 @@ mean(out1.4[[3]])
 ### Through marker effect
 
 out1.2=JGRA.marker(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.E",fold,reshuffle)
-write.table(out1.2[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.2.txt",sep=""),quote=F,row.names=F)
+write.xlsx(out1.2, file = file.path(exp_trait_dir,"Prediction_Result_values_Marker_1.2.xlsx"))
+#write.table(out1.2[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.2.txt",sep=""),quote=F,row.names=F)
 ###within###
 out1.2[[2]]
 ###across###
 out1.2[[3]]
 
 out1.3=JGRA.marker(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.G",fold,reshuffle)
+write.xlsx(out1.3, file = file.path(exp_trait_dir,"Prediction_Result_values_Marker_1.3.xlsx"))
 write.table(out1.3[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.3.txt",sep=""),quote=F,row.names=F)
 ###within###
 apply(out1.3[[2]],2,mean)
@@ -167,10 +172,24 @@ apply(out1.3[[2]],2,mean)
 mean(out1.3[[3]])
 
 out1.4=JGRA.marker(LOC,pheno,geno,envir,enp,tt.line,tt.e,mets="RM.GE",fold,reshuffle) #### Need a longer time to run than others; be patient
-write.table(out1.4[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.4.txt",sep=""),quote=F,row.names=F)
+write.xlsx(out1.4, file = file.path(exp_trait_dir,"Prediction_Result_values_Marker_1.4.xlsx"))
+#write.table(out1.4[[1]],file=paste(exp_trait_dir,"Prediction_Result_",result.name[1],"_Marker_1.4.txt",sep=""),quote=F,row.names=F)
 ###within###
 apply(out1.4[[2]],2,mean)
 ###across###
 mean(out1.4[[3]])
 
+Plot_JGRA(exp_trait_dir,pheno,envir,
+          file_int_slo = "Intcp_Slope.txt",
+          file_out1.2 = "Prediction_Result_values_Norm_1.2.xlsx",
+          file_out1.3 = "Prediction_Result_values_Norm_1.3.xlsx",
+          file_out1.4 = "Prediction_Result_values_Norm_1.4.xlsx",
+          prefix_plot = "Prediction_Result_values_Norm")
+
+Plot_JGRA(exp_trait_dir,pheno,envir,
+          file_int_slo = "Intcp_Slope.txt",
+          file_out1.2 = "Prediction_Result_values_Marker_1.2.xlsx",
+          file_out1.3 = "Prediction_Result_values_Marker_1.3.xlsx",
+          file_out1.4 = "Prediction_Result_values_Marker_1.4.xlsx",
+          prefix_plot = "Prediction_Result_values_Marker")
 
