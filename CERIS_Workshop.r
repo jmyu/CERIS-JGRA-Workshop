@@ -32,7 +32,7 @@ trait <- 'FTgdd'; ##### Options: for Maize (G2F): DTA, PH, or YLD; for sorghum: 
 ######################################
 
 ###### If you modify some functions in this file, please run Line 27 each time to reload the updated functions
-subfunction_file <- paste(Top_dir, 'Sub_functions_Workshop_TTedits.r', sep = '');
+subfunction_file <- paste(Top_dir, 'Sub_functions_Workshop.r', sep = '');
 source(subfunction_file);
 
 exp_dir <- paste(Top_dir, experiment, '/', sep = '')
@@ -192,4 +192,5 @@ Plot_JGRA(exp_trait_dir,pheno,envir,
           file_out1.3 = "Prediction_Result_values_Marker_1.3.xlsx",
           file_out1.4 = "Prediction_Result_values_Marker_1.4.xlsx",
           prefix_plot = "Prediction_Result_values_Marker")
+
 
